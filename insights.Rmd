@@ -1,0 +1,26 @@
+---
+title: "Music Insights"
+author: "Kaleb Crisci"
+output: html_notebook
+---
+
+# We need to use Tidyverse for data import and manipulation
+# If uninstalled, install with 'install.packages("tidyverse")'
+```{r}
+library(tidyverse)
+```
+
+# Load in data
+```{r}
+survey <- read_csv("https://raw.githubusercontent.com/introdsci/MusicSurvey/master/music-survey.csv")
+preferences <- read_csv("https://raw.githubusercontent.com/introdsci/MusicSurvey/master/preferences-survey.csv")
+```
+
+# Cleaned up column Names
+# Better to not use column number, because data can change and # future users inadvertently rename the wrong column
+```{r}
+colnames(survey)[colnames(survey) == "First, we are going to create a pseudonym for you to keep this survey anonymous (more or less). Which pseudonym generator would you prefer?"] <- "generator_name"
+
+colnames(survey)[colnames(survey) == "Which musical instruments/talents do you play? (Select all that apply)"] <- "Musical Instruments Played"
+```
+
