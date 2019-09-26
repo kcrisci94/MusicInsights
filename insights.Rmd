@@ -10,6 +10,12 @@ output: html_notebook
 library(tidyverse)
 ```
 
+# We need to use the Dplyr package to make the data tidyr
+# If uninstalled, install with 'install.packages("tidyverse")'
+```{r}
+library(dplyr)
+```
+
 # Load in data
 ```{r}
 survey <- read_csv("https://raw.githubusercontent.com/introdsci/MusicSurvey/master/music-survey.csv")
@@ -21,6 +27,18 @@ preferences <- read_csv("https://raw.githubusercontent.com/introdsci/MusicSurvey
 ```{r}
 colnames(survey)[colnames(survey) == "First, we are going to create a pseudonym for you to keep this survey anonymous (more or less). Which pseudonym generator would you prefer?"] <- "generator_name"
 
-colnames(survey)[colnames(survey) == "Which musical instruments/talents do you play? (Select all that apply)"] <- "Musical Instruments Played"
+colnames(survey) <- c("time_submitted", "pseudonym_generator", "pseudonym", "sex", "academic_major", "academic_level", "year_born", "instrument_list", "favorite_song_artist", "favorite_song", "favorite_song_link")
+```
+
+## Create tables
+# Person
+
+```{r}
+person <- tibble(time_submitted = survey$time_submitted, pseudonym = survey$pseudonym, pseudonym_generator = survey$pseudonym_generator, sex = survey$sex, year_born = survey$year_born, academic_level = survey$academic_level, aademic_major = survey$academic_major)
+```
+
+# Song
+```{r}
+favorite_song <- tibble(pseudonym = survey$pseudonym, favorite_song = survey$favorite_song, favorite_song_artist = survey$favorite_song_artist, favorite_song_link = survey$favorite_song_link, )
 ```
 
