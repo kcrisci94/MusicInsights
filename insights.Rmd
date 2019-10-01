@@ -42,3 +42,8 @@ person <- tibble(time_submitted = survey$time_submitted, pseudonym = survey$pseu
 favorite_song <- tibble(pseudonym = survey$pseudonym, favorite_song = survey$favorite_song, favorite_song_artist = survey$favorite_song_artist, favorite_song_link = survey$favorite_song_link, )
 ```
 
+# Parsed Dates
+```{r}
+person$time_submitted <- as.POSIXlt(parse_datetime(person$time_submitted, format="%m/%d/%y %H:%M"))
+```
+
