@@ -34,7 +34,7 @@ colnames(survey) <- c("time_submitted", "pseudonym_generator", "pseudonym", "sex
 # Person
 
 ```{r}
-person <- tibble(time_submitted = survey$time_submitted, pseudonym = survey$pseudonym, pseudonym_generator = survey$pseudonym_generator, sex = survey$sex, year_born = survey$year_born, academic_level = survey$academic_level, aademic_major = survey$academic_major)
+person <- tibble(time_submitted = survey$time_submitted, pseudonym = survey$pseudonym, pseudonym_generator = survey$pseudonym_generator, sex = survey$sex, year_born = survey$year_born, academic_level = survey$academic_level, academic_major = survey$academic_major)
 ```
 
 # Song
@@ -45,5 +45,44 @@ favorite_song <- tibble(pseudonym = survey$pseudonym, favorite_song = survey$fav
 # Parsed Dates
 ```{r}
 person$time_submitted <- as.POSIXlt(parse_datetime(person$time_submitted, format="%m/%d/%y %H:%M"))
+```
+
+# Turn 2 columns into factors and combine extra factors together
+```{r}
+person$academic_major <- as.factor(person$academic_major)
+person$academic_level <- as.factor(person$academic_level)
+person$sex <- as.factor(person$sex)
+
+levels(person$academic_major)[levels(person$academic_major) == "Computer information systems"] <- "Computer Information Systems"
+```
+
+#Create a Ratings table to clean the preferences table
+```{r}
+ratings <- gather(preferences, artist_songs, rating, "40 crew\tNot Enough":"Wheezer\tBuddy Holly")
+
+colnames(ratings)[colnames(ratings)=="What was your pseudonym?"] <- "pseudonym"
+
+ratings$artist_songs <- as.factor(ratings$artist_songs)
+
+```
+
+#Create ggplot of Ratings
+```{r}
+ggplot(ratings, aes(x = rating)) + geom_histogram(binwidth = 1)
+
+```
+
+#Create a box and whisker plot 
+```{r}
+
+ggplot(ratings, aes(y = rating, x = pseudonym)) + geom_boxplot()
+```
+
+# Make a linerange plot
+```{r}
+ratings$pseudonym <- as.factor(ratings$pseudonym)
+ggplot(ratings, aes(y = rating, x = pseudonym)) + 
+  geom_point()
+
 ```
 
