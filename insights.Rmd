@@ -39,7 +39,9 @@ person <- tibble(time_submitted = survey$time_submitted, pseudonym = survey$pseu
 
 # Song
 ```{r}
-favorite_song <- tibble(pseudonym = survey$pseudonym, favorite_song = survey$favorite_song, favorite_song_artist = survey$favorite_song_artist, favorite_song_link = survey$favorite_song_link, )
+Favorite_song <- tibble(pseudonym = survey$pseudonym, favorite_song = survey$favorite_song, favorite_song_artist = survey$favorite_song_artist, favorite_song_link = survey$favorite_song_link, )
+
+Favorite_song$pseudonym <- as.factor(Favorite_song$pseudonym)
 ```
 
 # Parsed Dates
@@ -63,6 +65,7 @@ ratings <- gather(preferences, artist_songs, rating, "40 crew\tNot Enough":"Whee
 colnames(ratings)[colnames(ratings)=="What was your pseudonym?"] <- "pseudonym"
 
 ratings$artist_songs <- as.factor(ratings$artist_songs)
+ratings$Timestamp <- as.POSIXct(parse_datetime(ratings$Timestamp, format="%m/%d/%y %H:%M"))
 
 ```
 
@@ -83,6 +86,19 @@ ggplot(ratings, aes(y = rating, x = pseudonym)) + geom_boxplot()
 ratings$pseudonym <- as.factor(ratings$pseudonym)
 ggplot(ratings, aes(y = rating, x = pseudonym)) + 
   geom_point()
+
+```
+
+This will create a table that shows how each individual rated their own favorite songs. It incorporates pattern matching. First, we create the new_table by joining the data from favorite_song and ratings by the column **pseudonym**. Once that is done, we filter out all the ratings for each pseudonym except the rating for their own favorite song. Notice how there are a few duplicates in the table with different ratings. We want to keep the duplicates that have the latest timestamp information. To do this, we must first order the data in the table by decreasing **Timestamp** and use the distinct() function on **pseudonym**. This will keep only the first occurrence of **pseudonym**, which will be the latest timestamp since it is now sorted in descending order. Finally, we use select() to pull out only the columns that we need.
+```{r}
+
+new_table <- inner_join(Favorite_song, ratings, by = "pseudonym") %>%
+   filter(artist_songs != str_extract(artist_songs, favorite_song))
+new_table <- new_table[order(new_table$Timestamp, decreasing = TRUE),] %>%
+  distinct(pseudonym, .keep_all = TRUE) %>%
+  select(pseudonym, favorite_song, rating)
+
+summarize(new_table, mean(rating))
 
 ```
 
