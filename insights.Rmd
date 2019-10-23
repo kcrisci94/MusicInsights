@@ -81,13 +81,6 @@ ggplot(ratings, aes(x = rating)) + geom_histogram(binwidth = 1)
 ggplot(ratings, aes(y = rating, x = pseudonym)) + geom_boxplot()
 ```
 
-# Make a linerange plot
-```{r}
-ratings$pseudonym <- as.factor(ratings$pseudonym)
-ggplot(ratings, aes(y = rating, x = pseudonym)) + 
-  geom_point()
-
-```
 
 This will create a table that shows how each individual rated their own favorite songs. It incorporates pattern matching. First, we create the new_table by joining the data from favorite_song and ratings by the column **pseudonym**. Once that is done, we filter out all the ratings for each pseudonym except the rating for their own favorite song. Notice how there are a few duplicates in the table with different ratings. We want to keep the duplicates that have the latest timestamp information. To do this, we must first order the data in the table by decreasing **Timestamp** and use the distinct() function on **pseudonym**. This will keep only the first occurrence of **pseudonym**, which will be the latest timestamp since it is now sorted in descending order. Finally, we use select() to pull out only the columns that we need.
 ```{r}
