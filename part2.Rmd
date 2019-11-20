@@ -1,0 +1,88 @@
+---
+title: "Music Insights Part 2"
+author: "Kaleb Crisci"
+output: 
+   html_document: 
+      theme: cerulean
+---
+
+```{r message=FALSE, error=FALSE, warning=FALSE, results='hide'}
+include <- function(library_name){
+  if( !(library_name %in% installed.packages()) )
+    install.packages(library_name) 
+  library(library_name, character.only=TRUE)
+}
+```
+
+To pick up where we left off from part 1 of the music insights project, we will first load part 1. 
+```{r message=FALSE, error=FALSE, warning=FALSE, results='hide'}
+include("tidyverse")
+include("knitr")
+purl("insights.Rmd", output = "part1.r")
+source("part1.r")
+```
+
+
+
+In this section, we will get the average song rating for each individual who participated in the survey, and determine whether this value can be predicted based off of any or all of our other variables in the **person** table.
+
+To do this, take all the ratings information from the **ratings** table, and match them up to the information in the **person** table by the pseudonym. Then we want to group this larger dataset by pseudonym. Next, using the **summarise()** function, we create a new column, and provide a function to create the results in the column (in this case the mean() function). Now that the table has the added column ave, we can copy the contents of that column into a new column in the person table. 
+
+```{r}
+dummy <- left_join(person, ratings, by = "pseudonym") %>%
+  group_by(pseudonym) %>% 
+  summarise(ave = mean(rating))
+person$ave <- dummy$ave
+rm(dummy)
+```
+
+
+Now that we have the average rating that individuals rated all the songs, we can use this information to generate a linear model that will tell us how accurate our model is, and how good of a predictor each individual column in the table is at predicting how individuals would rate other people's songs. Using the **lm()** function, we can calculate the multiple linear regression coefficients to get these estimates. 
+
+```{r}
+lin_model <- lm(person, formula=ave ~ pseudonym_generator + sex + 
+                  academic_major + academic_level + year_born)
+summary(lin_model)
+```
+
+In order to determine if a variable is statistically significant to make our prediction, we look at the **pr(>|t|)**. Ideally, we would like this number to be as low as possible, but statistically significant would be anything less than **0.05.** We can see from our model that none of our variables meet this condition. We can also see that the **p-value** is fairly close to one. This means that approximately 74.9% of our data can be predicted with the null hypothesis. Therefore, we can conclude that we cannot make accurate predictions about the average song ratings for a person based off of any of the above variables. 
+
+
+We can now create a trained model.
+library "caret" is used for random numbers
+```{r}
+include("caret")
+
+```
+
+Set random seed value.
+```{r}
+set.seed(320) #this is the number to start with for random number generator
+```
+
+Create a data partition. Some of the data has NaN or NA values, so we remove them first before setting up the partitions.
+```{r}
+sample <- person %>% na.omit() 
+sample_selection <- createDataPartition(sample, p = 0.75, list = FALSE) # p to tell 75% - 25% split
+```
+
+Create subsets of overall dataset to act as training and test sets
+```{r}
+train <- person[sample_selection,]
+test <- person[-sample_selection,]
+```
+
+
+Now, we can create the training model and view the results. Because there is not enough variation in the data for sex, academic_major, we have to drop these variables to run the model.
+
+```{r}
+train_model <- lm(data = train, formula=ave ~ pseudonym_generator + academic_level + year_born)
+summary(train_model)
+```
+
+We can then use this training model to try to predict our variable. This does not work with this dataset because there is not enough variation in the academic_level category. The train model does not contain at least one of the values in the academic_level column in the test model.
+```{r}
+#(predictions <- train_model %>% predict(test))
+#test$ave
+```
+
